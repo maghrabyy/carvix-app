@@ -4,6 +4,7 @@ export type GetCarModelsResponseDTO = string[];
 export interface MarketInsightBrandPrice {
   avgPrice: number;
   brand: string;
+  count: number;
 }
 
 export interface MarketInsightVehicle {
@@ -71,7 +72,7 @@ export interface CarComparisonInput {
 export interface PageInfo {
   hasNext: boolean;
   pageIndex: number;
-  pageSIze: number; 
+  pageSIze: number;
   total: number;
 }
 

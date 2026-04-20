@@ -1,32 +1,65 @@
+import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import PricePredictionScreen from "../../screens/PricePredictionScreen";
-import { BanknoteArrowUp } from "lucide-react-native";
+import { BarChart2, Zap, GitCompare, Car } from "lucide-react-native";
+import { Colors } from "../../colors";
+import InsightsScreen from "../../screens/InsightsScreen";
+import PredictScreen from "../../screens/PredictScreen";
+import { Button, ButtonIcon } from "@/components/ui/button";
+import { useNavigation } from "@react-navigation/native";
+import { RootStackParamList } from "@/types/router.type";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import CompareScreen from "@/screens/CompareScreen";
 
 const Tab = createBottomTabNavigator();
 
 const TabNavigation = () => {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
   return (
     <Tab.Navigator
-      initialRouteName="pricePrediction"
-      screenOptions={{ headerShown: false }}
+      initialRouteName="Predict"
+      screenOptions={{
+        headerRightContainerStyle: { paddingRight: 8 },
+        headerRight: () => (
+          <Button
+            className="rounded-full"
+            variant="outline"
+            onPress={() => navigation.navigate("Garage")}
+          >
+            <ButtonIcon as={Car} />
+          </Button>
+        ),
+        tabBarActiveTintColor: Colors.primary,
+        tabBarInactiveTintColor: Colors.textSecondary,
+      }}
     >
       <Tab.Screen
-        name="pricePrediction"
+        name="Insights"
+        component={InsightsScreen}
         options={{
-          tabBarIcon: () => <BanknoteArrowUp color="#1C3376" />,
-          tabBarLabel: "Price Prediction",
-          tabBarLabelStyle: { color: "#1C3376" },
+          title: "Market Insights",
+          tabBarIcon: ({ color }) => <BarChart2 color={color} />,
+          tabBarLabel: "Insights",
         }}
-        component={PricePredictionScreen}
       />
       <Tab.Screen
-        name="carComparison"
+        name="Predict"
+        component={PredictScreen}
         options={{
-          tabBarIcon: () => <BanknoteArrowUp color="#1C3376" />,
-          tabBarLabel: "Car Comparison",
-          tabBarLabelStyle: { color: "#1C3376" },
+          title: "Price Prediction",
+          tabBarIcon: ({ color }) => <Zap color={color} />,
+          tabBarLabel: "Predict",
         }}
-        component={PricePredictionScreen}
+      />
+      <Tab.Screen
+        name="Compare"
+        component={CompareScreen}
+        options={{
+          title: "Price Comparison",
+          tabBarIcon: ({ color }) => <GitCompare color={color} />,
+          tabBarLabel: "Compare",
+        }}
       />
     </Tab.Navigator>
   );

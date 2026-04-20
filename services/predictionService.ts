@@ -1,9 +1,14 @@
-import { mlClient } from '../API/axios-config';
-import { ML_ENDPOINTS } from '../API/endpoints';
-import { PredictCarPriceRequestDTO } from '../types/requestDTOs.type';
-import { PredictCarPriceResponseDTO } from '../types/responseDTOs.type';
+import { mlClient } from "../API/axios-config";
+import { ML_ENDPOINTS } from "../API/endpoints";
+import { PredictCarPriceRequestDTO } from "../types/requestDTOs.type";
+import { PredictCarPriceResponseDTO } from "../types/responseDTOs.type";
 
-export const getPricePrediction = async (params: PredictCarPriceRequestDTO): Promise<PredictCarPriceResponseDTO> => {
-  const response = await mlClient.get<PredictCarPriceResponseDTO>(ML_ENDPOINTS.PRICE_PREDICTION, { params });
+export const getPricePrediction = async (
+  dto: PredictCarPriceRequestDTO,
+): Promise<PredictCarPriceResponseDTO> => {
+  const response = await mlClient.post<PredictCarPriceResponseDTO>(
+    ML_ENDPOINTS.PRICE_PREDICTION,
+    dto,
+  );
   return response.data;
 };

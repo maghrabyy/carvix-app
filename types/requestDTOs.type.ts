@@ -5,17 +5,19 @@ export interface GetCarModelsRequestDTO {
 export interface GetMarketInsightsRequestDTO {
   brands_limit?: number;
   vehicle_limit?: number;
+  sortBrands?: "popular" | "avgPriceDesc" | "avgPriceAsc";
 }
 
 export interface GetBudgetRecommendationRequestDTO {
   brand?: string;
   budget: number;
-  sort_by?:     "avg_price_desc" |
-    "avg_price_asc" |
-    "model_year_desc" |
-    "model_year_asc" |
-    "most_popular" |
-    "least_popular"
+  sort_by?:
+    | "avg_price_desc"
+    | "avg_price_asc"
+    | "model_year_desc"
+    | "model_year_asc"
+    | "most_popular"
+    | "least_popular";
   limit?: number;
   budget_threshold?: number;
   max_age_years?: number;
@@ -34,7 +36,7 @@ export interface GetCarComparisonRequestDTO {
   brand: string;
   model: string;
   year: number;
-  transmission: "automatic" | "manual"
+  transmission: "automatic" | "manual";
   km: number;
   price: number;
   pageSize?: number;
