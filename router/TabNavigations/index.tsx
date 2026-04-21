@@ -1,6 +1,6 @@
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { BarChart2, Zap, GitCompare, Car } from "lucide-react-native";
+import { BarChart2, Zap, GitCompare, Car, Banknote } from "lucide-react-native";
 import { Colors } from "../../colors";
 import InsightsScreen from "../../screens/InsightsScreen";
 import PredictScreen from "../../screens/PredictScreen";
@@ -9,6 +9,7 @@ import { useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "@/types/router.type";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import CompareScreen from "@/screens/CompareScreen";
+import { View } from "react-native";
 
 const Tab = createBottomTabNavigator();
 
@@ -22,13 +23,24 @@ const TabNavigation = () => {
       screenOptions={{
         headerRightContainerStyle: { paddingRight: 8 },
         headerRight: () => (
-          <Button
-            className="rounded-full"
-            variant="outline"
-            onPress={() => navigation.navigate("Garage")}
-          >
-            <ButtonIcon as={Car} />
-          </Button>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+            <Button
+              className="rounded-full"
+              variant="outline"
+              size="sm"
+              onPress={() => navigation.navigate("Garage")}
+            >
+              <ButtonIcon as={Car} />
+            </Button>
+            <Button
+              className="rounded-full"
+              variant="outline"
+              size="sm"
+              onPress={() => navigation.navigate("BudgetRecommendation")}
+            >
+              <ButtonIcon as={Banknote} />
+            </Button>
+          </View>
         ),
         tabBarActiveTintColor: Colors.primary,
         tabBarInactiveTintColor: Colors.textSecondary,

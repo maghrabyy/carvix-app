@@ -1,4 +1,8 @@
-import { keepPreviousData, useQuery, UseQueryResult } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useQuery,
+  UseQueryResult,
+} from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import {
   GetCarModelsRequestDTO,
@@ -51,11 +55,12 @@ export const useMarketInsights = (
 
 export const useBudgetRecommendation = (
   params: GetBudgetRecommendationRequestDTO,
+  enabled: boolean = true,
 ): UseQueryResult<GetBudgetRecommendationResponseDTO, AxiosError> => {
   return useQuery<GetBudgetRecommendationResponseDTO, AxiosError>({
     queryKey: ["budget_recommendation", params],
     queryFn: () => carService.getBudgetRecommendation(params),
-    enabled: !!params.budget,
+    enabled: enabled && !!params.budget,
   });
 };
 

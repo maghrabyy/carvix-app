@@ -72,7 +72,7 @@ export default function CompareScreen({
       model: "",
       year: "",
       km: "",
-      transmission: "Automatic",
+      transmission: "",
       sellingPrice: "",
       sameBrand: false,
       sameTransmission: false,
