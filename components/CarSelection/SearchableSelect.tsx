@@ -1,16 +1,13 @@
 import { Colors } from "@/colors";
+import { Box } from "@/components/ui/box";
 import { Input, InputField } from "@/components/ui/input";
 import {
   Select,
-  SelectBackdrop,
-  SelectContent,
-  SelectDragIndicator,
-  SelectDragIndicatorWrapper,
+  SelectFlatList,
   SelectIcon,
   SelectInput,
   SelectItem,
   SelectPortal,
-  SelectScrollView,
   SelectTrigger,
 } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
@@ -18,7 +15,6 @@ import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
 import { ChevronDown } from "lucide-react-native";
 import React, { useMemo, useState } from "react";
-import { KeyboardAvoidingView, Platform } from "react-native";
 
 export type SearchableSelectItem = {
   label: string;
@@ -35,6 +31,8 @@ type SearchableSelectProps = {
   isLoading?: boolean;
   isDisabled?: boolean;
   emptyText?: string;
+  snapPoints?: Array<number | string>;
+  initialSnapIndex?: number;
 };
 
 export function SearchableSelect({
@@ -47,6 +45,8 @@ export function SearchableSelect({
   isLoading = false,
   isDisabled = false,
   emptyText = "No results",
+  snapPoints,
+  initialSnapIndex = 0,
 }: SearchableSelectProps) {
   const [search, setSearch] = useState("");
 
@@ -84,17 +84,21 @@ export function SearchableSelect({
           </SelectIcon>
         </SelectTrigger>
 
-        <SelectPortal>
-          <SelectBackdrop />
-          <SelectContent>
-            <KeyboardAvoidingView
-              style={{ width: "100%" }}
-              behavior={Platform.OS === "ios" ? "padding" : "height"}
-            >
-              <SelectDragIndicatorWrapper>
-                <SelectDragIndicator />
-              </SelectDragIndicatorWrapper>
-              <VStack style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
+        <SelectPortal
+          snapPoints={snapPoints}
+          initialSnapIndex={initialSnapIndex}
+        >
+          <SelectFlatList
+            data={filteredItems}
+            renderItem={({ item }) => (
+              <SelectItem
+                key={item.value}
+                label={item.label}
+                value={item.value}
+              />
+            )}
+            ListHeaderComponent={
+              <Box style={{ paddingHorizontal: 8 }}>
                 <Input
                   size="md"
                   variant="outline"
@@ -109,27 +113,23 @@ export function SearchableSelect({
                     placeholder={searchPlaceholder}
                   />
                 </Input>
-              </VStack>
-
-              <SelectScrollView>
-                {filteredItems.map((i) => (
-                  <SelectItem key={i.value} label={i.label} value={i.value} />
-                ))}
-
-                {!isLoading && filteredItems.length === 0 && (
-                  <Text
-                    style={{
-                      paddingHorizontal: 16,
-                      paddingVertical: 12,
-                      color: Colors.textSecondary,
-                    }}
-                  >
-                    {emptyText}
-                  </Text>
-                )}
-              </SelectScrollView>
-            </KeyboardAvoidingView>
-          </SelectContent>
+              </Box>
+            }
+            stickyHeaderIndices={[0]}
+            ListEmptyComponent={
+              !isLoading ? (
+                <Text
+                  style={{
+                    paddingHorizontal: 16,
+                    paddingVertical: 12,
+                    color: Colors.textSecondary,
+                  }}
+                >
+                  {emptyText}
+                </Text>
+              ) : null
+            }
+          />
         </SelectPortal>
       </Select>
     </VStack>

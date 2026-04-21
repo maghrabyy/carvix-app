@@ -9,12 +9,9 @@ import {
   SelectInput,
   SelectIcon,
   SelectPortal,
-  SelectBackdrop,
   SelectContent,
   SelectItem,
   SelectScrollView,
-  SelectDragIndicatorWrapper,
-  SelectDragIndicator,
 } from "@/components/ui/select";
 import { Input, InputField } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
@@ -61,10 +58,7 @@ export default function PredictScreen() {
   const transmission = useWatch({ control, name: "transmission" });
   const fuel = useWatch({ control, name: "fuel" });
 
-  const {
-    data: predictionData,
-    isFetching: predicting,
-  } = usePricePrediction(
+  const { data: predictionData, isFetching: predicting } = usePricePrediction(
     predictionParams ??
       ({
         brand: "",
@@ -210,9 +204,9 @@ export default function PredictScreen() {
                   fontSize: 12,
                   marginLeft: 4,
                 }}
-                >
-                  Transmission
-                </Text>
+              >
+                Transmission
+              </Text>
               <Controller
                 control={control}
                 name="transmission"
@@ -228,11 +222,7 @@ export default function PredictScreen() {
                       </SelectIcon>
                     </SelectTrigger>
                     <SelectPortal>
-                      <SelectBackdrop />
                       <SelectContent>
-                        <SelectDragIndicatorWrapper>
-                          <SelectDragIndicator />
-                        </SelectDragIndicatorWrapper>
                         <SelectScrollView>
                           {["Automatic", "Manual"].map((t) => (
                             <SelectItem key={t} label={t} value={t} />
@@ -259,7 +249,10 @@ export default function PredictScreen() {
                 control={control}
                 name="fuel"
                 render={({ field }) => (
-                  <Select selectedValue={field.value} onValueChange={field.onChange}>
+                  <Select
+                    selectedValue={field.value}
+                    onValueChange={field.onChange}
+                  >
                     <SelectTrigger variant="outline" size="md">
                       <SelectInput placeholder="Select Fuel type" />
                       <SelectIcon className="mr-3">
@@ -267,11 +260,7 @@ export default function PredictScreen() {
                       </SelectIcon>
                     </SelectTrigger>
                     <SelectPortal>
-                      <SelectBackdrop />
                       <SelectContent>
-                        <SelectDragIndicatorWrapper>
-                          <SelectDragIndicator />
-                        </SelectDragIndicatorWrapper>
                         <SelectScrollView>
                           {["Benzene", "Diesel", "Electric", "Hybrid"].map(
                             (t) => (

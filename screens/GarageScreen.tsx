@@ -14,7 +14,6 @@ import {
   SelectInput,
   SelectIcon,
   SelectPortal,
-  SelectBackdrop,
   SelectContent,
   SelectItem,
   SelectScrollView,
@@ -60,7 +59,6 @@ export default function GarageScreen() {
   const year = useWatch({ control, name: "year" });
   const km = useWatch({ control, name: "km" });
   const transmission = useWatch({ control, name: "transmission" });
-
 
   const handleOpenSheet = () => bottomSheetModalRef.current?.present();
   const handleCloseSheet = () => bottomSheetModalRef.current?.dismiss();
@@ -285,7 +283,6 @@ export default function GarageScreen() {
                         </SelectIcon>
                       </SelectTrigger>
                       <SelectPortal>
-                        <SelectBackdrop />
                         <SelectContent>
                           <SelectScrollView>
                             {["Automatic", "Manual"].map((t) => (

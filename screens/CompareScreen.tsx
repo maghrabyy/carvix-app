@@ -10,12 +10,9 @@ import {
   SelectInput,
   SelectIcon,
   SelectPortal,
-  SelectBackdrop,
   SelectContent,
   SelectItem,
   SelectScrollView,
-  SelectDragIndicatorWrapper,
-  SelectDragIndicator,
 } from "@/components/ui/select";
 import { Input, InputField } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -107,7 +104,10 @@ export default function CompareScreen({
   const yearRangeError = sameYear
     ? undefined
     : rangeError(yearFrom.trim() || undefined, yearTo.trim() || undefined);
-  const kmRangeError = rangeError(kmFrom.trim() || undefined, kmTo.trim() || undefined);
+  const kmRangeError = rangeError(
+    kmFrom.trim() || undefined,
+    kmTo.trim() || undefined,
+  );
   const isComparisonFiltersValid = !yearRangeError && !kmRangeError;
 
   const yearNumber = Number(year);
@@ -118,18 +118,18 @@ export default function CompareScreen({
     mode === "manual"
       ? Boolean(
           brand &&
-            model &&
-            year.trim() &&
-            Number.isFinite(yearNumber) &&
-            km.trim() &&
-            Number.isFinite(kmNumber) &&
-            sellingPrice.trim() &&
-            Number.isFinite(sellingPriceNumber),
+          model &&
+          year.trim() &&
+          Number.isFinite(yearNumber) &&
+          km.trim() &&
+          Number.isFinite(kmNumber) &&
+          sellingPrice.trim() &&
+          Number.isFinite(sellingPriceNumber),
         )
       : Boolean(
           selectedVehicleId &&
-            sellingPrice.trim() &&
-            Number.isFinite(sellingPriceNumber),
+          sellingPrice.trim() &&
+          Number.isFinite(sellingPriceNumber),
         );
 
   const selectedVehicle = vehicles.find((v) => v.id === selectedVehicleId);
@@ -247,11 +247,7 @@ export default function CompareScreen({
                   </SelectIcon>
                 </SelectTrigger>
                 <SelectPortal>
-                  <SelectBackdrop />
                   <SelectContent>
-                    <SelectDragIndicatorWrapper>
-                      <SelectDragIndicator />
-                    </SelectDragIndicatorWrapper>
                     <SelectScrollView>
                       {vehicles.map((v) => (
                         <SelectItem
@@ -374,25 +370,21 @@ export default function CompareScreen({
                       selectedValue={field.value}
                       onValueChange={field.onChange}
                     >
-                  <SelectTrigger variant="outline" size="md">
-                    <SelectInput placeholder="Select Transmission" />
-                    <SelectIcon className="mr-3">
-                      <ChevronDown size={16} />
-                    </SelectIcon>
-                  </SelectTrigger>
-                  <SelectPortal>
-                    <SelectBackdrop />
-                    <SelectContent>
-                      <SelectDragIndicatorWrapper>
-                        <SelectDragIndicator />
-                      </SelectDragIndicatorWrapper>
-                      <SelectScrollView>
-                        {["Automatic", "Manual"].map((t) => (
-                          <SelectItem key={t} label={t} value={t} />
-                        ))}
-                      </SelectScrollView>
-                    </SelectContent>
-                  </SelectPortal>
+                      <SelectTrigger variant="outline" size="md">
+                        <SelectInput placeholder="Select Transmission" />
+                        <SelectIcon className="mr-3">
+                          <ChevronDown size={16} />
+                        </SelectIcon>
+                      </SelectTrigger>
+                      <SelectPortal>
+                        <SelectContent>
+                          <SelectScrollView>
+                            {["Automatic", "Manual"].map((t) => (
+                              <SelectItem key={t} label={t} value={t} />
+                            ))}
+                          </SelectScrollView>
+                        </SelectContent>
+                      </SelectPortal>
                     </Select>
                   )}
                 />
@@ -464,8 +456,9 @@ export default function CompareScreen({
                   model: selectedVehicle?.model || "",
                   year: Number(selectedVehicle?.year) || 0,
                   km: selectedVehicle?.km || 0,
-                  transmission:
-                    selectedVehicle?.transmission as "automatic" | "manual",
+                  transmission: selectedVehicle?.transmission as
+                    | "automatic"
+                    | "manual",
                 }
               : {
                   brand,

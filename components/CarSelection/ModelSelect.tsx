@@ -21,6 +21,7 @@ export function ModelSelect({
     () => (models ?? []).map((m) => ({ label: m, value: m })),
     [models],
   );
+  const snapPoints = useMemo(() => ["50%", "75%", "92%"], []);
 
   return (
     <SearchableSelect
@@ -33,6 +34,8 @@ export function ModelSelect({
       isLoading={isFetching}
       isDisabled={isDisabled || !brand || isFetching}
       emptyText={brand ? "No models found" : "Select a brand first"}
+      snapPoints={snapPoints}
+      initialSnapIndex={1}
     />
   );
 }

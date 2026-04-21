@@ -15,6 +15,7 @@ export function BrandSelect({ value, onChange, isDisabled }: BrandSelectProps) {
     () => (brands ?? []).map((b) => ({ label: b, value: b })),
     [brands],
   );
+  const snapPoints = useMemo(() => ["50%", "75%", "92%"], []);
 
   return (
     <SearchableSelect
@@ -27,6 +28,8 @@ export function BrandSelect({ value, onChange, isDisabled }: BrandSelectProps) {
       isLoading={isLoading}
       isDisabled={isDisabled}
       emptyText="No brands found"
+      snapPoints={snapPoints}
+      initialSnapIndex={1}
     />
   );
 }
