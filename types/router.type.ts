@@ -1,5 +1,7 @@
 export type RootStackParamList = {
   mainTab: undefined;
   Garage: undefined;
-  BudgetRecommendation: undefined;
+  BudgetRecommendation?: {
+    budget: number;
+  };
 };

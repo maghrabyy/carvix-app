@@ -11,6 +11,10 @@ import { ComparisonRecommendation } from "@/types/responseDTOs.type";
 import { ComparisonResultsFilter } from "@/components/Compare Screen/ComparisonResultsFilter";
 import { useEffect, useState } from "react";
 import { ScrollView } from "react-native";
+import { Card } from "@/components/ui/card";
+import { useNavigation } from "@react-navigation/native";
+import { RootStackParamList } from "@/types/router.type";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 interface MarketAlternativeResultsProps {
   sellingPrice: number;
@@ -49,11 +53,14 @@ const MarketAlternativeResults = ({
   comparisonFilters,
 }: MarketAlternativeResultsProps) => {
   const [showResults, setShowResults] = useState(false);
+  const [sellingPriceSnapshot, setSellingPriceSnapshot] = useState<number>(0);
   // Pagination State
   const [pageIndex, setPageIndex] = useState(0);
   const [accumulatedComparisons, setAccumulatedComparisons] = useState<
     ComparisonRecommendation[]
   >([]);
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const [comparisonSnapshot, setComparisonSnapshot] = useState<
     Omit<GetCarComparisonRequestDTO, "pageIndex" | "pageSize"> | undefined
@@ -122,6 +129,7 @@ const MarketAlternativeResults = ({
       };
 
     setComparisonSnapshot(snapshot);
+    setSellingPriceSnapshot(sellingPrice);
     setPageIndex(0);
     setAccumulatedComparisons([]);
     setShowResults(true);
@@ -180,7 +188,7 @@ const MarketAlternativeResults = ({
             <QualificationBadge
               qualification={comparisonData.sellingPriceQualification}
               marketAvgPrice={comparisonData.priceRange?.highestPrice || 0}
-              sellingPrice={sellingPrice}
+              sellingPrice={sellingPriceSnapshot}
             />
           ) : (
             <Spinner size="small" color={Colors.primary} />
@@ -210,7 +218,7 @@ const MarketAlternativeResults = ({
             />
           ))}
 
-          {!!comparisonData?.pageInfo?.hasNext && (
+          {comparisonData?.pageInfo?.hasNext ? (
             <Button
               variant="outline"
               style={{ borderColor: Colors.primary }}
@@ -228,6 +236,35 @@ const MarketAlternativeResults = ({
                 Show next
               </ButtonText>
             </Button>
+          ) : (
+            <Card
+              style={{
+                backgroundColor: Colors.primaryXLight,
+                borderColor: Colors.primaryLight,
+                borderWidth: 1,
+                padding: 16,
+                marginBottom: 16,
+              }}
+            >
+              <Text style={{ color: Colors.primaryDark, marginBottom: 8 }}>
+                Wanna see what else a EGP{" "}
+                {sellingPriceSnapshot.toLocaleString()} can get you in the
+                market?
+              </Text>
+              <Button
+                size="sm"
+                style={{ backgroundColor: Colors.primary }}
+                onPress={() =>
+                  navigation.push("BudgetRecommendation", {
+                    budget: sellingPriceSnapshot,
+                  })
+                }
+              >
+                <ButtonText style={{ color: "white" }}>
+                  Go to Budget Recommendation
+                </ButtonText>
+              </Button>
+            </Card>
           )}
         </>
       )}

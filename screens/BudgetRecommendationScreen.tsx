@@ -25,6 +25,8 @@ import { BrandSelect } from "@/components/CarSelection/BrandSelect";
 import { VehicleCard } from "@/components/VehicleCard";
 import { useBudgetRecommendation } from "@/hooks/query/useCarQueries";
 import { GetBudgetRecommendationRequestDTO } from "@/types/requestDTOs.type";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { RootStackParamList } from "@/types/router.type";
 
 type SortOption = NonNullable<GetBudgetRecommendationRequestDTO["sort_by"]>;
 
@@ -43,9 +45,15 @@ const SORT_OPTIONS: { label: string; value: SortOption }[] = [
   { label: "Least Popular", value: "least_popular" },
 ];
 
-export default function BudgetRecommendationScreen() {
+export default function BudgetRecommendationScreen({
+  route,
+}: NativeStackScreenProps<RootStackParamList, "BudgetRecommendation">) {
   const [queryParams, setQueryParams] =
     useState<GetBudgetRecommendationRequestDTO | null>(null);
+
+  const params = route.params;
+
+  const budget = params?.budget ?? 0;
 
   const {
     control,
@@ -54,7 +62,7 @@ export default function BudgetRecommendationScreen() {
   } = useForm<BudgetFormValues>({
     mode: "onChange",
     defaultValues: {
-      budget: "",
+      budget: budget.toString(),
       brand: "",
       sort_by: "",
     },
