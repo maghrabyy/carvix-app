@@ -21,6 +21,7 @@ import { useVehicles } from "../hooks/useVehicles";
 import { BrandSelect } from "@/components/CarSelection/BrandSelect";
 import { ModelSelect } from "@/components/CarSelection/ModelSelect";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useFocusEffect } from "@react-navigation/native";
 import { RootStackParamList } from "@/types/router.type";
 import MarketAlternativeResults from "@/components/Compare Screen/MarketAlternativeResults";
 import { Controller, useForm, useWatch } from "react-hook-form";
@@ -62,7 +63,7 @@ export default function CompareScreen({
 }: {
   navigation: NativeStackNavigationProp<RootStackParamList, "mainTab">;
 }) {
-  const { vehicles } = useVehicles();
+  const { vehicles, reloadVehicles } = useVehicles();
   const scrollViewRef = React.useRef<ScrollView>(null);
   const { control, setValue } = useForm<CompareFormValues>({
     mode: "onChange",
@@ -133,11 +134,23 @@ export default function CompareScreen({
           Number.isFinite(sellingPriceNumber),
         );
 
+  useFocusEffect(
+    React.useCallback(() => {
+      reloadVehicles();
+    }, [reloadVehicles]),
+  );
+
   const selectedVehicle = vehicles.find((v) => v.id === selectedVehicleId);
 
   const selectedVehicleLabel = selectedVehicle
     ? `${selectedVehicle?.brand} ${selectedVehicle?.model} (${selectedVehicle?.year})`
     : "Select Vehicle";
+
+  React.useEffect(() => {
+    if (mode !== "garage") return;
+    if (!selectedVehicleId) return;
+    if (!selectedVehicle) setValue("selectedVehicleId", "");
+  }, [mode, selectedVehicleId, selectedVehicle, setValue]);
 
   return (
     <KeyboardAvoidingView

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Vehicle } from "../types/vehicle.type";
 import uuid from "react-native-uuid";
@@ -7,6 +7,7 @@ const VEHICLES_STORAGE_KEY = "vehicles";
 
 export function useVehicles(): {
   vehicles: Vehicle[];
+  reloadVehicles: () => Promise<void>;
   addVehicle: (v: Omit<Vehicle, "id">) => Promise<void>;
   updateVehicle: (id: string, v: Omit<Vehicle, "id">) => Promise<void>;
   removeVehicle: (id: string) => Promise<void>;
@@ -15,22 +16,24 @@ export function useVehicles(): {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const loadVehicles = async () => {
+  const loadVehicles = useCallback(async () => {
     try {
       const stored = await AsyncStorage.getItem(VEHICLES_STORAGE_KEY);
       if (stored) {
         setVehicles(JSON.parse(stored));
+      } else {
+        setVehicles([]);
       }
     } catch (err) {
       console.error("Failed to load vehicles", err);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadVehicles();
-  }, []);
+  }, [loadVehicles]);
 
   const addVehicle = async (v: Omit<Vehicle, "id">) => {
     try {
@@ -80,5 +83,12 @@ export function useVehicles(): {
     }
   };
 
-  return { vehicles, addVehicle, updateVehicle, removeVehicle, loading };
+  return {
+    vehicles,
+    reloadVehicles: loadVehicles,
+    addVehicle,
+    updateVehicle,
+    removeVehicle,
+    loading,
+  };
 }
