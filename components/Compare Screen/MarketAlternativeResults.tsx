@@ -184,14 +184,19 @@ const MarketAlternativeResults = ({
           >
             Analysis Result
           </Text>
-          {comparisonData ? (
+          {isComparing ? (
+            <Spinner size="small" color={Colors.primary} />
+          ) : comparisonData ? (
             <QualificationBadge
               qualification={comparisonData.sellingPriceQualification}
               marketAvgPrice={comparisonData.priceRange?.highestPrice || 0}
               sellingPrice={sellingPriceSnapshot}
             />
           ) : (
-            <Spinner size="small" color={Colors.primary} />
+            <Text>
+              There&lsquo;s no enough data to analyze your price, try adjusting
+              the filters and make sure your price is a valid number.
+            </Text>
           )}
 
           <Text
