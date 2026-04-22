@@ -3,6 +3,7 @@ import { API_ENDPOINTS } from "../API/endpoints";
 import {
   GetCarModelsRequestDTO,
   GetMarketInsightsRequestDTO,
+  GetVehiclePriceTrendRequestDTO,
   GetBudgetRecommendationRequestDTO,
   GetMostPopularBrandsRequestDTO,
   GetMostPopularModelsRequestDTO,
@@ -12,6 +13,7 @@ import {
   GetCarBrandsResponseDTO,
   GetCarModelsResponseDTO,
   GetMarketInsightsResponseDTO,
+  GetVehiclePriceTrendResponseDTO,
   GetBudgetRecommendationResponseDTO,
   GetMostPopularBrandsResponseDTO,
   GetMostPopularModelsResponseDTO,
@@ -40,6 +42,16 @@ export const getMarketInsights = async (
 ): Promise<GetMarketInsightsResponseDTO> => {
   const response = await apiClient.get<GetMarketInsightsResponseDTO>(
     API_ENDPOINTS.MARKET_INSIGHTS,
+    { params },
+  );
+  return response.data;
+};
+
+export const getVehiclePriceTrend = async (
+  params: GetVehiclePriceTrendRequestDTO,
+): Promise<GetVehiclePriceTrendResponseDTO> => {
+  const response = await apiClient.get<GetVehiclePriceTrendResponseDTO>(
+    API_ENDPOINTS.VEHICLE_PRICE_TREND,
     { params },
   );
   return response.data;

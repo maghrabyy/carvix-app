@@ -10,6 +10,7 @@ import { GetCarComparisonRequestDTO } from "@/types/requestDTOs.type";
 import { ComparisonRecommendation } from "@/types/responseDTOs.type";
 import { ComparisonResultsFilter } from "@/components/Compare Screen/ComparisonResultsFilter";
 import { useEffect, useState } from "react";
+import { ScrollView } from "react-native";
 
 interface MarketAlternativeResultsProps {
   sellingPrice: number;
@@ -18,6 +19,7 @@ interface MarketAlternativeResultsProps {
     "brand" | "model" | "year" | "km" | "transmission"
   >;
   isFormValid: boolean;
+  scrollViewRef?: React.RefObject<ScrollView | null>;
   isComparisonFiltersValid: boolean;
   comparisonFilters: {
     sameBrand: boolean;
@@ -39,6 +41,7 @@ interface MarketAlternativeResultsProps {
   };
 }
 const MarketAlternativeResults = ({
+  scrollViewRef,
   sellingPrice,
   vehicleData,
   isFormValid,
@@ -71,7 +74,12 @@ const MarketAlternativeResults = ({
         }
       : undefined;
 
-  const { data: comparisonData, isFetching: isComparing } = useCarComparison(
+  const {
+    data: comparisonData,
+    isFetching: isComparing,
+    isSuccess,
+    dataUpdatedAt,
+  } = useCarComparison(
     (comparisonParams ??
       ({
         brand: "",
@@ -124,6 +132,12 @@ const MarketAlternativeResults = ({
   };
 
   useEffect(() => {
+    if (isSuccess && dataUpdatedAt > 0 && scrollViewRef?.current) {
+      scrollViewRef.current.scrollToEnd({ animated: true });
+    }
+  }, [isSuccess, dataUpdatedAt, scrollViewRef]);
+
+  useEffect(() => {
     if (!showResults) return;
     if (!comparisonData?.vehicleRecommendations?.length) return;
     if (comparisonData.pageInfo?.pageIndex !== pageIndex) return;
@@ -136,7 +150,7 @@ const MarketAlternativeResults = ({
   }, [comparisonData, pageIndex, showResults]);
 
   return (
-    <VStack style={{ gap: 16 }}>
+    <VStack style={{ gap: 16, marginTop: 8 }}>
       <ComparisonResultsFilter {...comparisonFilters} />
 
       <Button

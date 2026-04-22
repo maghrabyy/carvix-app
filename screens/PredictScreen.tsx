@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ScrollView, KeyboardAvoidingView, Platform } from "react-native";
 import { VStack } from "@/components/ui/vstack";
 import { Text } from "@/components/ui/text";
@@ -29,6 +29,7 @@ export default function PredictScreen() {
   const [isPredicted, setIsPredicted] = useState(false);
   const [predictionParams, setPredictionParams] =
     useState<PredictCarPriceRequestDTO | null>(null);
+  const scrollViewRef = React.useRef<ScrollView | null>(null);
 
   type PredictFormValues = {
     brand: string;
@@ -58,7 +59,12 @@ export default function PredictScreen() {
   const transmission = useWatch({ control, name: "transmission" });
   const fuel = useWatch({ control, name: "fuel" });
 
-  const { data: predictionData, isFetching: predicting } = usePricePrediction(
+  const {
+    data: predictionData,
+    isFetching: predicting,
+    isSuccess,
+    dataUpdatedAt,
+  } = usePricePrediction(
     predictionParams ??
       ({
         brand: "",
@@ -95,6 +101,12 @@ export default function PredictScreen() {
     });
   });
 
+  useEffect(() => {
+    if (isSuccess && dataUpdatedAt > 0 && scrollViewRef?.current) {
+      scrollViewRef.current.scrollToEnd({ animated: true });
+    }
+  }, [isSuccess, dataUpdatedAt, scrollViewRef]);
+
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: Colors.backgroundSecondary }}
@@ -102,7 +114,10 @@ export default function PredictScreen() {
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        <ScrollView contentContainerStyle={{ paddingHorizontal: 16 }}>
+        <ScrollView
+          contentContainerStyle={{ paddingHorizontal: 16 }}
+          ref={scrollViewRef}
+        >
           <VStack
             style={{
               gap: 16,

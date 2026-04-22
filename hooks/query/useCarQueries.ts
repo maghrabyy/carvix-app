@@ -7,6 +7,7 @@ import { AxiosError } from "axios";
 import {
   GetCarModelsRequestDTO,
   GetMarketInsightsRequestDTO,
+  GetVehiclePriceTrendRequestDTO,
   GetBudgetRecommendationRequestDTO,
   GetMostPopularBrandsRequestDTO,
   GetMostPopularModelsRequestDTO,
@@ -16,6 +17,7 @@ import {
   GetCarBrandsResponseDTO,
   GetCarModelsResponseDTO,
   GetMarketInsightsResponseDTO,
+  GetVehiclePriceTrendResponseDTO,
   GetBudgetRecommendationResponseDTO,
   GetMostPopularBrandsResponseDTO,
   GetMostPopularModelsResponseDTO,
@@ -50,6 +52,17 @@ export const useMarketInsights = (
   return useQuery<GetMarketInsightsResponseDTO, AxiosError>({
     queryKey: ["market_insights", params],
     queryFn: () => carService.getMarketInsights(params),
+  });
+};
+
+export const useVehiclePriceTrend = (
+  params: GetVehiclePriceTrendRequestDTO,
+  enabled: boolean = true,
+): UseQueryResult<GetVehiclePriceTrendResponseDTO, AxiosError> => {
+  return useQuery<GetVehiclePriceTrendResponseDTO, AxiosError>({
+    queryKey: ["vehicle_price_trend", params],
+    queryFn: () => carService.getVehiclePriceTrend(params),
+    enabled: enabled && !!params.brand && !!params.model && !!params.year,
   });
 };
 

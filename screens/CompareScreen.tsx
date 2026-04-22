@@ -1,7 +1,6 @@
 import React from "react";
 import { ScrollView, KeyboardAvoidingView, Platform } from "react-native";
 import { VStack } from "@/components/ui/vstack";
-import { HStack } from "@/components/ui/hstack";
 import { Text } from "@/components/ui/text";
 import { Button, ButtonText } from "@/components/ui/button";
 import {
@@ -25,6 +24,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "@/types/router.type";
 import MarketAlternativeResults from "@/components/Compare Screen/MarketAlternativeResults";
 import { Controller, useForm, useWatch } from "react-hook-form";
+import SegmentedTabs from "@/components/SegmentedTabs";
 
 const parseNumber = (value?: string): number | undefined => {
   if (!value) return undefined;
@@ -63,6 +63,7 @@ export default function CompareScreen({
   navigation: NativeStackNavigationProp<RootStackParamList, "mainTab">;
 }) {
   const { vehicles } = useVehicles();
+  const scrollViewRef = React.useRef<ScrollView>(null);
   const { control, setValue } = useForm<CompareFormValues>({
     mode: "onChange",
     defaultValues: {
@@ -146,6 +147,7 @@ export default function CompareScreen({
       <ScrollView
         contentContainerStyle={{ padding: 16 }}
         style={{ backgroundColor: Colors.backgroundSecondary }}
+        ref={scrollViewRef}
       >
         {vehicles.length === 0 && (
           <Card
@@ -172,49 +174,19 @@ export default function CompareScreen({
         )}
 
         {/* Mode Toggle */}
-        <HStack
-          style={{
-            backgroundColor: Colors.background,
-            borderRadius: 16,
-            padding: 4,
-            marginBottom: 16,
-          }}
-        >
-          <Button
-            style={{
-              flex: 1,
-              backgroundColor:
-                mode === "garage" ? Colors.primaryLight : "transparent",
-              opacity: vehicles.length === 0 ? 0.4 : 1,
-            }}
-            isDisabled={vehicles.length === 0}
-            onPress={() => setValue("mode", "garage")}
-          >
-            <ButtonText
-              style={{
-                color: mode === "garage" ? "white" : Colors.textSecondary,
-              }}
-            >
-              From garage
-            </ButtonText>
-          </Button>
-          <Button
-            style={{
-              flex: 1,
-              backgroundColor:
-                mode === "manual" ? Colors.primaryLight : "transparent",
-            }}
-            onPress={() => setValue("mode", "manual")}
-          >
-            <ButtonText
-              style={{
-                color: mode === "manual" ? "white" : Colors.textSecondary,
-              }}
-            >
-              Enter manually
-            </ButtonText>
-          </Button>
-        </HStack>
+        <SegmentedTabs
+          value={mode}
+          onChange={(val) => setValue("mode", val)}
+          containerStyle={{ marginBottom: 16 }}
+          options={[
+            {
+              value: "garage",
+              label: "From Garage",
+              disabled: vehicles.length === 0,
+            },
+            { value: "manual", label: "Enter Manually" },
+          ]}
+        />
 
         <VStack
           style={{
@@ -430,6 +402,7 @@ export default function CompareScreen({
           sellingPrice={
             Number.isFinite(sellingPriceNumber) ? sellingPriceNumber : 0
           }
+          scrollViewRef={scrollViewRef}
           isComparisonFiltersValid={isComparisonFiltersValid}
           comparisonFilters={{
             sameBrand: !!sameBrand,

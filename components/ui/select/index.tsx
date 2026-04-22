@@ -119,6 +119,37 @@ type SelectProps = {
   className?: string;
 };
 
+function extractSelectItemLabels(
+  node: React.ReactNode,
+): Record<string, string> {
+  const labels: Record<string, string> = {};
+
+  type ItemLikeProps = {
+    value?: unknown;
+    label?: unknown;
+    children?: React.ReactNode;
+  };
+
+  const visit = (n: React.ReactNode) => {
+    if (!React.isValidElement(n)) return;
+    const element = n as React.ReactElement<ItemLikeProps>;
+    const props = element.props ?? {};
+
+    // Collect labels from item-like elements even if the portal content
+    // hasn't mounted yet (e.g. BottomSheetModal not presented). We avoid
+    // relying on component identity checks here because some wrappers
+    // (e.g. nativewind cssInterop) can alter the element type reference.
+    if (typeof props.value === "string" && typeof props.label === "string") {
+      labels[props.value] = props.label;
+    }
+
+    if (props.children) React.Children.forEach(props.children, visit);
+  };
+
+  React.Children.forEach(node, visit);
+  return labels;
+}
+
 function Select({
   children,
   selectedValue,
@@ -130,12 +161,22 @@ function Select({
   const [isOpen, setIsOpen] = React.useState(false);
   const [labelMap, setLabelMap] = React.useState<Record<string, string>>({});
 
+  const derivedLabelMap = React.useMemo(
+    () => extractSelectItemLabels(children),
+    [children],
+  );
+
   const setSelectedLabel = React.useCallback((value: string, label: string) => {
     setLabelMap((prev) => {
       if (prev[value] === label) return prev;
       return { ...prev, [value]: label };
     });
   }, []);
+
+  const effectiveLabelMap = React.useMemo(
+    () => ({ ...derivedLabelMap, ...labelMap }),
+    [derivedLabelMap, labelMap],
+  );
 
   const contextValue = React.useMemo<SelectContextValue>(
     () => ({
@@ -146,14 +187,16 @@ function Select({
       selectedValue,
       selectedLabel:
         selectedLabel ??
-        (selectedValue ? (labelMap[selectedValue] ?? undefined) : undefined),
+        (selectedValue
+          ? (effectiveLabelMap[selectedValue] ?? selectedValue)
+          : undefined),
       setSelectedLabel,
       onValueChange,
     }),
     [
       isDisabled,
       isOpen,
-      labelMap,
+      effectiveLabelMap,
       onValueChange,
       selectedLabel,
       selectedValue,
@@ -233,7 +276,7 @@ const SelectPortal = React.forwardRef<BottomSheetModal, SelectPortalProps>(
 );
 
 const selectContentStyle = tva({
-  base: "rounded-tl-3xl rounded-tr-3xl bg-background-0 py-2 max-h-[92vh]",
+  base: "rounded-tl-3xl rounded-tr-3xl bg-background-0 max-h-[92vh]",
 });
 
 const SelectContent = React.forwardRef<
@@ -396,7 +439,7 @@ const SelectInput = React.forwardRef<
       ref={ref}
       editable={false}
       pointerEvents="none"
-      value={selectedLabel}
+      value={selectedLabel ?? ""}
       placeholder={placeholder}
       {...props}
     />

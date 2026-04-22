@@ -31,7 +31,8 @@ import { ModelSelect } from "@/components/CarSelection/ModelSelect";
 import { Controller, useForm, useWatch } from "react-hook-form";
 
 export default function GarageScreen() {
-  const { vehicles, loading, addVehicle, removeVehicle } = useVehicles();
+  const { vehicles, loading, addVehicle, updateVehicle, removeVehicle } =
+    useVehicles();
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const snapPoints = useMemo(() => ["60%", "92%"], []);
 
@@ -117,7 +118,10 @@ export default function GarageScreen() {
             year={item.year}
             km={item.km}
             transmission={item.transmission}
+            isEditable
+            onEdit={(values) => updateVehicle(item.id, values)}
             onDelete={() => removeVehicle(item.id)}
+            showPriceTrend
           />
         )}
       />

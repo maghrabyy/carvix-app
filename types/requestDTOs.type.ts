@@ -8,6 +8,12 @@ export interface GetMarketInsightsRequestDTO {
   sortBrands?: "popular" | "avgPriceDesc" | "avgPriceAsc";
 }
 
+export interface GetVehiclePriceTrendRequestDTO {
+  brand: string;
+  model: string;
+  year: number;
+}
+
 export interface GetBudgetRecommendationRequestDTO {
   brand?: string;
   budget: number;

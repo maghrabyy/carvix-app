@@ -10,6 +10,7 @@ import { Colors } from "../colors";
 import { SkeletonCard } from "../components/SkeletonCard";
 import { PopularVehiclesChart } from "../components/PopularVehiclesChart";
 import { SafeAreaView } from "react-native-safe-area-context";
+import SegmentedTabs from "@/components/SegmentedTabs";
 
 export default function InsightsScreen() {
   const { data, isError, refetch, isLoading } = useMarketInsights({
@@ -17,6 +18,9 @@ export default function InsightsScreen() {
     vehicle_limit: 8,
     sortBrands: "popular",
   });
+  const [marketTrendsView, setMarketTrendsView] = React.useState<
+    "monthly" | "yearly"
+  >("monthly");
 
   if (isError) {
     return (
@@ -77,6 +81,13 @@ export default function InsightsScreen() {
       stroke: Colors.primary,
     },
   };
+
+  const marketTrendsData =
+    marketTrendsView === "monthly"
+      ? data?.marketTrends?.monthly ?? []
+      : data?.marketTrends?.yearly ?? [];
+  const marketTrendsLabels = marketTrendsData.map((d) => d.label);
+  const marketTrendsValues = marketTrendsData.map((d) => d.value);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: Colors.background }}>
@@ -157,6 +168,67 @@ export default function InsightsScreen() {
               >
                 {data?.mostPopularVehicles?.length ? (
                   <PopularVehiclesChart data={data.mostPopularVehicles} />
+                ) : (
+                  <Text style={{ color: Colors.textSecondary }}>
+                    No data available
+                  </Text>
+                )}
+              </Card>
+            )}
+          </VStack>
+
+          {/* Section 3: Market Trends */}
+          <VStack style={{ gap: 8, marginTop: 16 }}>
+            <Text
+              style={{
+                fontSize: 18,
+                fontWeight: "bold",
+                color: Colors.textPrimary,
+              }}
+            >
+              Market Trends
+            </Text>
+
+            <SegmentedTabs
+              value={marketTrendsView}
+              onChange={setMarketTrendsView}
+              options={[
+                { value: "monthly", label: "Monthly" },
+                { value: "yearly", label: "Annual" },
+              ]}
+            />
+
+            {isLoading ? (
+              <SkeletonCard height={200} />
+            ) : (
+              <Card
+                style={{
+                  padding: 16,
+                  borderWidth: 1,
+                  borderColor: Colors.borderLight,
+                  backgroundColor: Colors.backgroundSecondary,
+                  alignItems: "center",
+                }}
+              >
+                {marketTrendsValues.length > 0 ? (
+                  <LineChart
+                    data={{
+                      labels: marketTrendsLabels,
+                      datasets: [{ data: marketTrendsValues }],
+                    }}
+                    width={screenWidth - 32}
+                    height={200}
+                    yAxisSuffix={"%"}
+                    chartConfig={{
+                      ...chartConfig,
+                      decimalPlaces: 2,
+                    }}
+                    bezier
+                    style={{
+                      marginVertical: 8,
+                      borderRadius: 16,
+                    }}
+                  />
                 ) : (
                   <Text style={{ color: Colors.textSecondary }}>
                     No data available

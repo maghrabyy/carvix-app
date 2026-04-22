@@ -14,9 +14,29 @@ export interface MarketInsightVehicle {
   model: string;
 }
 
+export interface MarketTrendPoint {
+  label: string;
+  value: number;
+}
+
+export interface MarketTrends {
+  monthly: MarketTrendPoint[];
+  yearly: MarketTrendPoint[];
+}
+
 export interface GetMarketInsightsResponseDTO {
   averagePriceByBrand: MarketInsightBrandPrice[];
+  marketTrends: MarketTrends;
   mostPopularVehicles: MarketInsightVehicle[];
+}
+
+export interface GetVehiclePriceTrendResponseDTO {
+  brand: string;
+  changePercent: number;
+  currentAvgPrice: number;
+  model: string;
+  priceTrend: "up" | "low";
+  year: number;
 }
 
 export interface BudgetRecommendationVehicle {
