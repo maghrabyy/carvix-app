@@ -6,9 +6,14 @@ import { PredictCarPriceResponseDTO } from "../types/responseDTOs.type";
 export const getPricePrediction = async (
   dto: PredictCarPriceRequestDTO,
 ): Promise<PredictCarPriceResponseDTO> => {
-  const response = await mlClient.post<PredictCarPriceResponseDTO>(
-    ML_ENDPOINTS.PRICE_PREDICTION,
-    dto,
-  );
-  return response.data;
+  try {
+    const response = await mlClient.post<PredictCarPriceResponseDTO>(
+      ML_ENDPOINTS.PRICE_PREDICTION,
+      dto,
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching price prediction:", error);
+    throw error;
+  }
 };

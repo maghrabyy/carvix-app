@@ -23,12 +23,9 @@ import { ModelSelect } from "@/components/CarSelection/ModelSelect";
 import { usePricePrediction } from "../hooks/query/predictionQueries";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Controller, useForm, useWatch } from "react-hook-form";
-import { PredictCarPriceRequestDTO } from "@/types/requestDTOs.type";
 
 export default function PredictScreen() {
   const [isPredicted, setIsPredicted] = useState(false);
-  const [predictionParams, setPredictionParams] =
-    useState<PredictCarPriceRequestDTO | null>(null);
   const scrollViewRef = React.useRef<ScrollView | null>(null);
 
   type PredictFormValues = {
@@ -60,22 +57,11 @@ export default function PredictScreen() {
   const fuel = useWatch({ control, name: "fuel" });
 
   const {
+    mutate: predictPrice,
     data: predictionData,
-    isFetching: predicting,
+    isPending: predicting,
     isSuccess,
-    dataUpdatedAt,
-  } = usePricePrediction(
-    predictionParams ??
-      ({
-        brand: "",
-        model: "",
-        year: "",
-        km: 0,
-        transmission: "",
-        fuel: "",
-      } as PredictCarPriceRequestDTO),
-    !!predictionParams,
-  );
+  } = usePricePrediction();
 
   const yearNumber = Number(year);
   const kmNumber = Number(km);
@@ -91,7 +77,7 @@ export default function PredictScreen() {
 
   const handlePredict = handleSubmit((values) => {
     setIsPredicted(true);
-    setPredictionParams({
+    predictPrice({
       brand: values.brand,
       model: values.model,
       year: values.year,
@@ -102,10 +88,10 @@ export default function PredictScreen() {
   });
 
   useEffect(() => {
-    if (isSuccess && dataUpdatedAt > 0 && scrollViewRef?.current) {
+    if (isSuccess && scrollViewRef?.current) {
       scrollViewRef.current.scrollToEnd({ animated: true });
     }
-  }, [isSuccess, dataUpdatedAt, scrollViewRef]);
+  }, [isSuccess, scrollViewRef]);
 
   return (
     <SafeAreaView
