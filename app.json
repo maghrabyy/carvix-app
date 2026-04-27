@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "carvix-gp",
+    "name": "carvix",
     "slug": "carvix-gp",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -21,10 +21,16 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.maghrabyyy.carvixgp"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "ce6c9e84-c49f-40c3-8db6-8d27d134b14b"
+      }
     }
   }
 }
