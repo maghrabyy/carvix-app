@@ -1,34 +1,15 @@
 import React, { useRef, useMemo } from "react";
-import {
-  FlatList,
-  KeyboardAvoidingView,
-  Platform,
-  StyleSheet,
-} from "react-native";
+import { FlatList } from "react-native";
 import { VStack } from "@/components/ui/vstack";
-import { Text } from "@/components/ui/text";
-import { Button, ButtonText, ButtonIcon } from "@/components/ui/button";
-import {
-  Select,
-  SelectTrigger,
-  SelectInput,
-  SelectIcon,
-  SelectPortal,
-  SelectContent,
-  SelectItem,
-  SelectScrollView,
-} from "@/components/ui/select";
-import { Input, InputField } from "@/components/ui/input";
+import { Button, ButtonIcon } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { Plus, Car, ChevronDown } from "lucide-react-native";
-import { BottomSheetModal, BottomSheetView } from "@gorhom/bottom-sheet";
+import { Plus, Car } from "lucide-react-native";
+import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { Colors } from "../colors";
 import { useVehicles } from "../hooks/useVehicles";
 import { VehicleCard } from "../components/VehicleCard";
 import { EmptyState } from "../components/EmptyState";
-import { BrandSelect } from "@/components/CarSelection/BrandSelect";
-import { ModelSelect } from "@/components/CarSelection/ModelSelect";
-import { Controller, useForm, useWatch } from "react-hook-form";
+import { AddVehicleForm } from "../components/AddVehicleForm";
 
 export default function GarageScreen() {
   const { vehicles, loading, addVehicle, updateVehicle, removeVehicle } =
@@ -36,56 +17,19 @@ export default function GarageScreen() {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const snapPoints = useMemo(() => ["60%", "92%"], []);
 
-  type GarageFormValues = {
-    brand: string;
-    model: string;
-    year: string;
-    km: string;
-    transmission: string;
-  };
-
-  const { control, setValue, handleSubmit, reset } = useForm<GarageFormValues>({
-    mode: "onChange",
-    defaultValues: {
-      brand: "",
-      model: "",
-      year: "",
-      km: "",
-      transmission: "",
-    },
-  });
-
-  const brand = useWatch({ control, name: "brand" });
-  const model = useWatch({ control, name: "model" });
-  const year = useWatch({ control, name: "year" });
-  const km = useWatch({ control, name: "km" });
-  const transmission = useWatch({ control, name: "transmission" });
-
   const handleOpenSheet = () => bottomSheetModalRef.current?.present();
   const handleCloseSheet = () => bottomSheetModalRef.current?.dismiss();
 
-  const handleSave = handleSubmit(async (values) => {
-    await addVehicle({
-      brand: values.brand,
-      model: values.model,
-      year: values.year,
-      km: parseInt(values.km, 10),
-      transmission: values.transmission,
-    });
-    reset();
+  const handleAddVehicle = async (values: {
+    brand: string;
+    model: string;
+    year: string;
+    km: number;
+    transmission: string;
+  }) => {
+    await addVehicle(values);
     handleCloseSheet();
-  });
-
-  const yearNumber = Number(year);
-  const kmNumber = Number(km);
-  const isFormValid =
-    !!brand &&
-    !!model &&
-    year.trim() &&
-    Number.isFinite(yearNumber) &&
-    km.trim() &&
-    Number.isFinite(kmNumber) &&
-    !!transmission;
+  };
 
   const renderContent = () => {
     if (loading) {
@@ -159,172 +103,8 @@ export default function GarageScreen() {
         enablePanDownToClose
         backgroundStyle={{ backgroundColor: Colors.background }}
       >
-        <BottomSheetView style={styles.contentContainer}>
-          <KeyboardAvoidingView
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-            style={{ flex: 1 }}
-          >
-            <VStack style={{ padding: 16, gap: 16 }}>
-              <Text
-                style={{
-                  fontSize: 20,
-                  fontWeight: "bold",
-                  color: Colors.textPrimary,
-                  marginBottom: 8,
-                }}
-              >
-                Add Vehicle
-              </Text>
-
-              <Controller
-                control={control}
-                name="brand"
-                render={({ field }) => (
-                  <BrandSelect
-                    value={field.value}
-                    onChange={(val) => {
-                      field.onChange(val);
-                      setValue("model", "");
-                    }}
-                  />
-                )}
-              />
-
-              <Controller
-                control={control}
-                name="model"
-                render={({ field }) => (
-                  <ModelSelect
-                    brand={brand}
-                    value={field.value}
-                    onChange={field.onChange}
-                  />
-                )}
-              />
-
-              <VStack style={{ gap: 8 }}>
-                <Text
-                  style={{
-                    color: Colors.textSecondary,
-                    fontSize: 12,
-                    marginLeft: 4,
-                  }}
-                >
-                  Year
-                </Text>
-                <Input
-                  size="md"
-                  variant="outline"
-                  style={{ backgroundColor: Colors.backgroundSecondary }}
-                >
-                  <Controller
-                    control={control}
-                    name="year"
-                    render={({ field }) => (
-                      <InputField
-                        placeholder="e.g. 2024"
-                        value={field.value}
-                        onChangeText={field.onChange}
-                        keyboardType="numeric"
-                      />
-                    )}
-                  />
-                </Input>
-              </VStack>
-
-              <VStack style={{ gap: 8 }}>
-                <Text
-                  style={{
-                    color: Colors.textSecondary,
-                    fontSize: 12,
-                    marginLeft: 4,
-                  }}
-                >
-                  Mileage (KM)
-                </Text>
-                <Input
-                  size="md"
-                  variant="outline"
-                  style={{ backgroundColor: Colors.backgroundSecondary }}
-                >
-                  <Controller
-                    control={control}
-                    name="km"
-                    render={({ field }) => (
-                      <InputField
-                        placeholder="e.g. 50000"
-                        value={field.value}
-                        onChangeText={field.onChange}
-                        keyboardType="numeric"
-                      />
-                    )}
-                  />
-                </Input>
-              </VStack>
-
-              <VStack style={{ gap: 8 }}>
-                <Text
-                  style={{
-                    color: Colors.textSecondary,
-                    fontSize: 12,
-                    marginLeft: 4,
-                  }}
-                >
-                  Transmission
-                </Text>
-                <Controller
-                  control={control}
-                  name="transmission"
-                  render={({ field }) => (
-                    <Select
-                      selectedValue={field.value}
-                      onValueChange={field.onChange}
-                    >
-                      <SelectTrigger variant="outline" size="md">
-                        <SelectInput placeholder="Select Transmission" />
-                        <SelectIcon className="mr-3">
-                          <ChevronDown size={16} />
-                        </SelectIcon>
-                      </SelectTrigger>
-                      <SelectPortal>
-                        <SelectContent>
-                          <SelectScrollView>
-                            {["Automatic", "Manual"].map((t) => (
-                              <SelectItem key={t} label={t} value={t} />
-                            ))}
-                          </SelectScrollView>
-                        </SelectContent>
-                      </SelectPortal>
-                    </Select>
-                  )}
-                />
-              </VStack>
-
-              <Button
-                size="md"
-                style={{
-                  marginTop: 16,
-                  backgroundColor: isFormValid
-                    ? Colors.primary
-                    : Colors.borderDark,
-                }}
-                onPress={handleSave}
-                isDisabled={!isFormValid}
-              >
-                <ButtonText style={{ color: "white" }}>
-                  Save to garage
-                </ButtonText>
-              </Button>
-            </VStack>
-          </KeyboardAvoidingView>
-        </BottomSheetView>
+        <AddVehicleForm onSubmit={handleAddVehicle} />
       </BottomSheetModal>
     </VStack>
   );
 }
-
-const styles = StyleSheet.create({
-  contentContainer: {
-    flex: 1,
-  },
-});

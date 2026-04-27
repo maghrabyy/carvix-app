@@ -1,16 +1,15 @@
 import React from "react";
-import { ScrollView, Dimensions } from "react-native";
+import { ScrollView } from "react-native";
 import { VStack } from "@/components/ui/vstack";
 import { Card } from "@/components/ui/card";
 import { Text } from "@/components/ui/text";
 import { Button, ButtonText } from "@/components/ui/button";
-import { LineChart } from "react-native-chart-kit";
 import { useMarketInsights } from "../hooks/query/useCarQueries";
 import { Colors } from "../colors";
-import { SkeletonCard } from "../components/SkeletonCard";
-import { PopularVehiclesChart } from "../components/PopularVehiclesChart";
 import { SafeAreaView } from "react-native-safe-area-context";
-import SegmentedTabs from "@/components/SegmentedTabs";
+import { BrandsAveragePriceChart } from "../components/BrandsAveragePriceChart";
+import { MostPopularVehicleChart } from "../components/MostPopularVehicleChart";
+import { MarketTrendsChart } from "../components/MarketTrendsChart";
 
 export default function InsightsScreen() {
   const { data, isError, refetch, isLoading } = useMarketInsights({
@@ -18,9 +17,6 @@ export default function InsightsScreen() {
     vehicle_limit: 8,
     sortBrands: "popular",
   });
-  const [marketTrendsView, setMarketTrendsView] = React.useState<
-    "monthly" | "yearly"
-  >("monthly");
 
   if (isError) {
     return (
@@ -56,187 +52,22 @@ export default function InsightsScreen() {
     );
   }
 
-  const chartData = data?.averagePriceByBrand || [];
-  const displayChartData = chartData;
-
-  const labels = displayChartData.map((d) =>
-    d.brand.length > 6 ? d.brand.substring(0, 5) + "." : d.brand,
-  );
-  const values = displayChartData.map((d) => d.avgPrice);
-  const screenWidth = Dimensions.get("window").width;
-
-  const chartConfig = {
-    backgroundColor: "transparent",
-    color: () => Colors.primaryLight,
-    fillShadowGradient: Colors.primary,
-    fillShadowGradientOpacity: 0.15,
-    backgroundGradientFromOpacity: 0,
-    backgroundGradientToOpacity: 0,
-    strokeWidth: 2,
-    decimalPlaces: 0,
-    labelColor: () => Colors.textSecondary,
-    propsForDots: {
-      r: "4",
-      strokeWidth: "2",
-      stroke: Colors.primary,
-    },
-  };
-
-  const marketTrendsData =
-    marketTrendsView === "monthly"
-      ? data?.marketTrends?.monthly ?? []
-      : data?.marketTrends?.yearly ?? [];
-  const marketTrendsLabels = marketTrendsData.map((d) => d.label);
-  const marketTrendsValues = marketTrendsData.map((d) => d.value);
-
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: Colors.background }}>
       <ScrollView>
         <VStack style={{ paddingHorizontal: 16, gap: 16 }}>
-          {/* Section 1: Average Price by Brand */}
-          <VStack style={{ gap: 8 }}>
-            <Text
-              style={{
-                fontSize: 18,
-                fontWeight: "bold",
-                color: Colors.textPrimary,
-              }}
-            >
-              Average Price by Brand
-            </Text>
-            {isLoading ? (
-              <SkeletonCard height={200} />
-            ) : (
-              <Card
-                style={{
-                  padding: 16,
-                  borderWidth: 1,
-                  borderColor: Colors.borderLight,
-                  backgroundColor: Colors.backgroundSecondary,
-                  alignItems: "center",
-                }}
-              >
-                {values.length > 0 ? (
-                  <LineChart
-                    data={{
-                      labels,
-                      datasets: [{ data: values }],
-                    }}
-                    width={screenWidth - 32}
-                    height={200}
-                    yAxisSuffix={"k"}
-                    formatYLabel={(value) =>
-                      `${(Number(value) / 1000).toFixed(0)}`
-                    }
-                    chartConfig={chartConfig}
-                    bezier
-                    style={{
-                      marginVertical: 8,
-                      borderRadius: 16,
-                    }}
-                  />
-                ) : (
-                  <Text style={{ color: Colors.textSecondary }}>
-                    No data available
-                  </Text>
-                )}
-              </Card>
-            )}
-          </VStack>
-
-          {/* Section 2: Most Popular Vehicles */}
-          <VStack style={{ gap: 8, marginTop: 16 }}>
-            <Text
-              style={{
-                fontSize: 18,
-                fontWeight: "bold",
-                color: Colors.textPrimary,
-              }}
-            >
-              Most Popular Vehicles
-            </Text>
-            {isLoading ? (
-              <SkeletonCard rows={5} />
-            ) : (
-              <Card
-                style={{
-                  padding: 16,
-                  borderWidth: 1,
-                  borderColor: Colors.borderLight,
-                  backgroundColor: Colors.backgroundSecondary,
-                }}
-              >
-                {data?.mostPopularVehicles?.length ? (
-                  <PopularVehiclesChart data={data.mostPopularVehicles} />
-                ) : (
-                  <Text style={{ color: Colors.textSecondary }}>
-                    No data available
-                  </Text>
-                )}
-              </Card>
-            )}
-          </VStack>
-
-          {/* Section 3: Market Trends */}
-          <VStack style={{ gap: 8, marginTop: 16 }}>
-            <Text
-              style={{
-                fontSize: 18,
-                fontWeight: "bold",
-                color: Colors.textPrimary,
-              }}
-            >
-              Market Trends
-            </Text>
-
-            <SegmentedTabs
-              value={marketTrendsView}
-              onChange={setMarketTrendsView}
-              options={[
-                { value: "monthly", label: "Monthly" },
-                { value: "yearly", label: "Annual" },
-              ]}
-            />
-
-            {isLoading ? (
-              <SkeletonCard height={200} />
-            ) : (
-              <Card
-                style={{
-                  padding: 16,
-                  borderWidth: 1,
-                  borderColor: Colors.borderLight,
-                  backgroundColor: Colors.backgroundSecondary,
-                  alignItems: "center",
-                }}
-              >
-                {marketTrendsValues.length > 0 ? (
-                  <LineChart
-                    data={{
-                      labels: marketTrendsLabels,
-                      datasets: [{ data: marketTrendsValues }],
-                    }}
-                    width={screenWidth - 32}
-                    height={200}
-                    yAxisSuffix={"%"}
-                    chartConfig={{
-                      ...chartConfig,
-                      decimalPlaces: 2,
-                    }}
-                    bezier
-                    style={{
-                      marginVertical: 8,
-                      borderRadius: 16,
-                    }}
-                  />
-                ) : (
-                  <Text style={{ color: Colors.textSecondary }}>
-                    No data available
-                  </Text>
-                )}
-              </Card>
-            )}
-          </VStack>
+          <BrandsAveragePriceChart
+            data={data?.averagePriceByBrand}
+            isLoading={isLoading}
+          />
+          <MostPopularVehicleChart
+            data={data?.mostPopularVehicles}
+            isLoading={isLoading}
+          />
+          <MarketTrendsChart
+            data={data?.marketTrends}
+            isLoading={isLoading}
+          />
         </VStack>
       </ScrollView>
     </SafeAreaView>

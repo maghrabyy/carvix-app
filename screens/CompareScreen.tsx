@@ -2,30 +2,16 @@ import React from "react";
 import { ScrollView, KeyboardAvoidingView, Platform } from "react-native";
 import { VStack } from "@/components/ui/vstack";
 import { Text } from "@/components/ui/text";
-import { Button, ButtonText } from "@/components/ui/button";
-import {
-  Select,
-  SelectTrigger,
-  SelectInput,
-  SelectIcon,
-  SelectPortal,
-  SelectContent,
-  SelectItem,
-  SelectScrollView,
-} from "@/components/ui/select";
 import { Input, InputField } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
-import { ChevronDown } from "lucide-react-native";
 import { Colors } from "../colors";
 import { useVehicles } from "../hooks/useVehicles";
-import { BrandSelect } from "@/components/CarSelection/BrandSelect";
-import { ModelSelect } from "@/components/CarSelection/ModelSelect";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { RootStackParamList } from "@/types/router.type";
 import MarketAlternativeResults from "@/components/Compare Screen/MarketAlternativeResults";
+import { ComparisonOptions } from "@/components/Compare Screen/ComparisonOptions";
 import { Controller, useForm, useWatch } from "react-hook-form";
-import SegmentedTabs from "@/components/SegmentedTabs";
+import { VehicleFieldValues } from "@/components/VehicleFormFields";
 
 const parseNumber = (value?: string): number | undefined => {
   if (!value) return undefined;
@@ -40,14 +26,9 @@ const rangeError = (from?: string, to?: string): string | undefined => {
   return fromN > toN ? "From must not exceed To" : undefined;
 };
 
-type CompareFormValues = {
+type CompareFormValues = VehicleFieldValues & {
   mode: "garage" | "manual";
   selectedVehicleId: string;
-  brand: string;
-  model: string;
-  year: string;
-  km: string;
-  transmission: string;
   sellingPrice: string;
   sameBrand: boolean;
   sameTransmission: boolean;
@@ -152,6 +133,12 @@ export default function CompareScreen({
     if (!selectedVehicle) setValue("selectedVehicleId", "");
   }, [mode, selectedVehicleId, selectedVehicle, setValue]);
 
+  // Cast control/setValue to VehicleFieldValues for the shared form fields component
+  const vehicleControl =
+    control as unknown as import("react-hook-form").Control<VehicleFieldValues>;
+  const vehicleSetValue =
+    setValue as unknown as import("react-hook-form").UseFormSetValue<VehicleFieldValues>;
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -162,255 +149,58 @@ export default function CompareScreen({
         style={{ backgroundColor: Colors.backgroundSecondary }}
         ref={scrollViewRef}
       >
-        {vehicles.length === 0 && (
-          <Card
-            style={{
-              backgroundColor: Colors.primaryXLight,
-              borderColor: Colors.primaryLight,
-              borderWidth: 1,
-              padding: 16,
-              marginBottom: 16,
-            }}
-          >
-            <Text style={{ color: Colors.primaryDark, marginBottom: 8 }}>
-              No vehicles saved yet. Add your first vehicle to use quick
-              selection.
-            </Text>
-            <Button
-              size="sm"
-              style={{ backgroundColor: Colors.primary }}
-              onPress={() => navigation.push("Garage")}
-            >
-              <ButtonText style={{ color: "white" }}>Go to Garage</ButtonText>
-            </Button>
-          </Card>
-        )}
-
-        {/* Mode Toggle */}
-        <SegmentedTabs
-          value={mode}
-          onChange={(val) => setValue("mode", val)}
-          containerStyle={{ marginBottom: 16 }}
-          options={[
-            {
-              value: "garage",
-              label: "From Garage",
-              disabled: vehicles.length === 0,
-            },
-            { value: "manual", label: "Enter Manually" },
-          ]}
+        <ComparisonOptions
+          mode={mode}
+          onModeChange={(val) => setValue("mode", val)}
+          vehicles={vehicles}
+          selectedVehicleId={selectedVehicleId}
+          onSelectedVehicleChange={(v) => setValue("selectedVehicleId", v)}
+          selectedVehicleLabel={selectedVehicleLabel}
+          control={vehicleControl}
+          setValue={vehicleSetValue}
+          onNavigateToGarage={() => navigation.push("Garage")}
         />
 
+        {/* SELLING PRICE — shared between both modes */}
         <VStack
           style={{
-            gap: 16,
+            gap: 8,
+            marginTop: 16,
             backgroundColor: Colors.background,
             padding: 16,
             borderRadius: 16,
           }}
         >
-          {mode === "garage" ? (
-            <VStack style={{ gap: 8 }}>
-              <Text
-                style={{
-                  color: Colors.textSecondary,
-                  fontSize: 12,
-                  marginLeft: 4,
-                }}
-              >
-                Select Vehicle
-              </Text>
-              <Select
-                selectedLabel={selectedVehicleLabel}
-                selectedValue={selectedVehicleId}
-                onValueChange={(v) => setValue("selectedVehicleId", v)}
-              >
-                <SelectTrigger variant="outline" size="md">
-                  <SelectInput placeholder="e.g. Nissan Sunny (2024)" />
-                  <SelectIcon className="mr-3">
-                    <ChevronDown size={16} />
-                  </SelectIcon>
-                </SelectTrigger>
-                <SelectPortal>
-                  <SelectContent>
-                    <SelectScrollView>
-                      {vehicles.map((v) => (
-                        <SelectItem
-                          key={v.id}
-                          label={`${v.brand} ${v.model} (${v.year})`}
-                          value={v.id}
-                        />
-                      ))}
-                    </SelectScrollView>
-                  </SelectContent>
-                </SelectPortal>
-              </Select>
-            </VStack>
-          ) : (
-            <>
-              <Controller
-                control={control}
-                name="brand"
-                render={({ field }) => (
-                  <BrandSelect
-                    value={field.value}
-                    onChange={(val) => {
-                      field.onChange(val);
-                      setValue("model", "");
-                    }}
-                  />
-                )}
-              />
-
-              <Controller
-                control={control}
-                name="model"
-                render={({ field }) => (
-                  <ModelSelect
-                    brand={brand}
-                    value={field.value}
-                    onChange={field.onChange}
-                  />
-                )}
-              />
-
-              {/* YEAR */}
-              <VStack style={{ gap: 8 }}>
-                <Text
-                  style={{
-                    color: Colors.textSecondary,
-                    fontSize: 12,
-                    marginLeft: 4,
-                  }}
-                >
-                  Year
-                </Text>
-                <Input
-                  size="md"
-                  variant="outline"
-                  style={{ backgroundColor: Colors.backgroundSecondary }}
-                >
-                  <Controller
-                    control={control}
-                    name="year"
-                    render={({ field }) => (
-                      <InputField
-                        keyboardType="numeric"
-                        value={field.value}
-                        onChangeText={field.onChange}
-                        placeholder="e.g. 2024"
-                      />
-                    )}
-                  />
-                </Input>
-              </VStack>
-
-              {/* KM */}
-              <VStack style={{ gap: 8 }}>
-                <Text
-                  style={{
-                    color: Colors.textSecondary,
-                    fontSize: 12,
-                    marginLeft: 4,
-                  }}
-                >
-                  Mileage (KM)
-                </Text>
-                <Input
-                  size="md"
-                  variant="outline"
-                  style={{ backgroundColor: Colors.backgroundSecondary }}
-                >
-                  <Controller
-                    control={control}
-                    name="km"
-                    render={({ field }) => (
-                      <InputField
-                        keyboardType="numeric"
-                        value={field.value}
-                        onChangeText={field.onChange}
-                        placeholder="e.g. 50000"
-                      />
-                    )}
-                  />
-                </Input>
-              </VStack>
-
-              {/* TRANSMISSION */}
-              <VStack style={{ gap: 8 }}>
-                <Text
-                  style={{
-                    color: Colors.textSecondary,
-                    fontSize: 12,
-                    marginLeft: 4,
-                  }}
-                >
-                  Transmission
-                </Text>
-                <Controller
-                  control={control}
-                  name="transmission"
-                  render={({ field }) => (
-                    <Select
-                      selectedValue={field.value}
-                      onValueChange={field.onChange}
-                    >
-                      <SelectTrigger variant="outline" size="md">
-                        <SelectInput placeholder="Select Transmission" />
-                        <SelectIcon className="mr-3">
-                          <ChevronDown size={16} />
-                        </SelectIcon>
-                      </SelectTrigger>
-                      <SelectPortal>
-                        <SelectContent>
-                          <SelectScrollView>
-                            {["Automatic", "Manual"].map((t) => (
-                              <SelectItem key={t} label={t} value={t} />
-                            ))}
-                          </SelectScrollView>
-                        </SelectContent>
-                      </SelectPortal>
-                    </Select>
-                  )}
+          <Text
+            style={{
+              color: Colors.textSecondary,
+              fontSize: 12,
+              marginLeft: 4,
+            }}
+          >
+            Your selling price (EGP)
+          </Text>
+          <Input
+            size="md"
+            variant="outline"
+            style={{ backgroundColor: Colors.backgroundSecondary }}
+          >
+            <Controller
+              control={control}
+              name="sellingPrice"
+              render={({ field }) => (
+                <InputField
+                  keyboardType="numeric"
+                  value={field.value}
+                  onChangeText={field.onChange}
+                  placeholder="0"
                 />
-              </VStack>
-            </>
-          )}
-
-          {/* SELLING PRICE */}
-          <VStack style={{ gap: 8, marginTop: 8 }}>
-            <Text
-              style={{
-                color: Colors.textSecondary,
-                fontSize: 12,
-                marginLeft: 4,
-              }}
-            >
-              Your selling price (EGP)
-            </Text>
-            <Input
-              size="md"
-              variant="outline"
-              style={{ backgroundColor: Colors.backgroundSecondary }}
-            >
-              <Controller
-                control={control}
-                name="sellingPrice"
-                render={({ field }) => (
-                  <InputField
-                    keyboardType="numeric"
-                    value={field.value}
-                    onChangeText={field.onChange}
-                    placeholder="0"
-                  />
-                )}
-              />
-            </Input>
-          </VStack>
+              )}
+            />
+          </Input>
         </VStack>
 
         {/* RESULTS */}
-
         <MarketAlternativeResults
           sellingPrice={
             Number.isFinite(sellingPriceNumber) ? sellingPriceNumber : 0
